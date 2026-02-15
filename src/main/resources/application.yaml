@@ -1,0 +1,8 @@
+ktor:
+  application:
+    modules:
+      - de.linkel.ApplicationKt.module
+  deployment:
+    port: 8080
+app:
+  configFile: ${CONFIG_FILE:config.yaml}
