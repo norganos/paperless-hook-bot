@@ -40,6 +40,7 @@ class DefaultPaperlessLookup<T: BaseObj>(
     }
 
     override fun resolve(value: String): T? {
+        //TODO: as the lookup may be cached, we should be able to lazy load unknown elements?
         return byNameOrSlug[value]
     }
 

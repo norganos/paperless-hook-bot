@@ -1,9 +1,11 @@
-package de.linkel.model.paperless
+package de.linkel.model.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import de.linkel.model.paperless.CustomFieldValue
+import de.linkel.model.paperless.Document
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

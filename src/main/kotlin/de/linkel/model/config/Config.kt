@@ -1,8 +1,6 @@
 package de.linkel.model.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import de.linkel.model.paperless.DocumentPatch
-import de.linkel.service.PaperlessContext
 
 data class Config(
     val authentication: AuthenticationConfig = AuthenticationConfig(),

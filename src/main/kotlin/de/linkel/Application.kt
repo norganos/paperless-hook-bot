@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.ktor.serialization.jackson.*
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import de.linkel.model.api.DocumentAddedBody
+import de.linkel.model.dto.DocumentTask
 import de.linkel.service.AuthService
 import de.linkel.service.PaperlessDispatcherService
 import io.ktor.client.engine.cio.CIO
@@ -22,6 +23,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -44,6 +47,7 @@ fun Application.module() {
     log.info("Loaded config with ${config.paperless.size} paperless instances")
     val authService = AuthService(config.authentication)
     val dispatcher = PaperlessDispatcherService(CIO.create(), config.paperless)
+    val queue = Channel<DocumentTask>(256)
 
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
         jackson()
@@ -56,7 +60,31 @@ fun Application.module() {
             }
         }
     }
-    val scope = CoroutineScope(Job())
+    CoroutineScope(Job())
+        .launch {
+            queue.consumeEach { evt ->
+                dispatcher.getInstance(evt.url)
+                    ?.also { service ->
+                        service.extractDocumentId(evt.url)
+                            .also {
+                                if (it == null) {
+                                    log.warn("Could not extract document id from ${evt.url}")
+                                }
+                            }
+                            ?.also { id ->
+                                log.info("Processing document $id (${evt.url})")
+                                try {
+                                    service.process(id)
+                                } catch (e: Exception) {
+                                    log.error("Error processing document $id (${evt.url})", e)
+                                    if (evt.attempt < 5) {
+                                        queue.send(evt.copy(attempt = evt.attempt + 1))
+                                    }
+                                }
+                            }
+                    }
+            }
+        }
 
     val authOptional = config.authentication.basic.isEmpty()
     if (authOptional)
@@ -73,17 +101,9 @@ fun Application.module() {
                             log.warn("Could not find paperless instance for ${body.document}")
                         }
                     }
-                    ?.also { service ->
-                        service.extractDocumentId(body.document)
-                            .also {
-                                if (it == null) {
-                                    log.warn("Could not extract document id from ${body.document}")
-                                }
-                            }
-                            ?.also { id ->
-                                log.info("Scheduling processing for document $id")
-                                scope.launch { service.process(id) }
-                            }
+                    ?.also {
+                        log.info("Scheduling processing for document $body.document")
+                        queue.send(DocumentTask(body.document))
                     }
                     ?.let { HttpStatusCode.NoContent } ?: HttpStatusCode.BadRequest
 

@@ -3,6 +3,7 @@ package de.linkel.service
 import de.linkel.model.config.RuleConditions
 import de.linkel.model.config.RuleConfig
 import de.linkel.model.config.RuleSets
+import de.linkel.model.dto.DocumentPatch
 import de.linkel.model.paperless.*
 
 class RuleProcessor(

@@ -2,16 +2,14 @@ package de.linkel.service
 
 import de.linkel.model.config.PaperlessConnector
 import de.linkel.model.config.RuleConfig
+import de.linkel.model.dto.DocumentPatch
 import de.linkel.model.paperless.Document
-import de.linkel.model.paperless.DocumentPatch
-import io.ktor.client.call.body
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
-import java.lang.Math.pow
 import kotlin.math.pow
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class PaperlessInstanceService(
@@ -64,11 +62,6 @@ class PaperlessInstanceService(
     fun extractDocumentId(document: String): Long? {
         return document.substringBeforeLast('/').substringAfterLast('/')
             .toLongOrNull()
-//        val docUrl = connector.url("documents")
-//        return document
-//            .takeIf { it.startsWith(docUrl) }
-//            ?.substring(docUrl.length)
-//            ?.substringBefore('/')
-//            ?.toLongOrNull()
+            ?.takeIf { document == "${connector.baseUrl}/documents/$it/" }
     }
 }
