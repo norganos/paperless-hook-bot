@@ -48,7 +48,7 @@ docker run \
 or docker-compose:
 ```yaml
 services:
-  redis:
+  paperless-hook-bot:
     image: ghcr.io/norganos/paperless-hook-bot:main
     ports:
       - "8080:8080"
