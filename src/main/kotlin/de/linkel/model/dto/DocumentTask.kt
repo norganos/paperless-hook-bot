@@ -1,6 +1,8 @@
 package de.linkel.model.dto
 
-data class DocumentTask(
-    val url: String,
-    val attempt: Int = 0
-)
+interface DocumentTask {
+    val instance: String
+    val attempt: Int
+
+    fun retryCopy(): DocumentTask
+}

@@ -1,34 +1,16 @@
 package de.linkel.de.linkel.service
 
-import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import de.linkel.de.linkel.TestPaperlessContextFactory
 import de.linkel.model.config.PaperlessConnector
 import de.linkel.model.config.RuleConditions
 import de.linkel.model.config.RuleConfig
 import de.linkel.model.config.RuleSets
-import de.linkel.model.paperless.Correspondent
-import de.linkel.model.paperless.CustomField
-import de.linkel.model.paperless.DocumentType
-import de.linkel.model.paperless.IntegerCustomField
-import de.linkel.model.paperless.MonetaryCustomField
-import de.linkel.model.paperless.SelectCustomField
-import de.linkel.model.paperless.StoragePath
-import de.linkel.model.paperless.StringCustomField
-import de.linkel.model.paperless.Tag
-import de.linkel.service.DefaultPaperlessLookup
-import de.linkel.service.PaperlessContext
 import de.linkel.service.PaperlessInstanceService
-import io.ktor.client.engine.config
 import io.ktor.client.engine.mock.*
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
 import kotlin.test.Test
 
 class PaperlessInstanceTest {
@@ -101,16 +83,21 @@ class PaperlessInstanceTest {
 
             val connector = PaperlessConnector(mockEngine, url, "token")
             val contextFactory = TestPaperlessContextFactory()
-            val service = PaperlessInstanceService(connector, contextFactory, listOf(
-                RuleConfig(
-                    conditions = RuleConditions(filename = "(\\d{4})-(\\d{2})-(\\d{2})_Test_von_(.+)\\.pdf"),
-                    set = RuleSets(
-                        title = $$"Hallo $filename4 ($filename1-$filename2)",
-                        correspondent = "Bank",
-                        documentType = "Kontoauszug",
+            val service = PaperlessInstanceService(
+                connector,
+                contextFactory,
+                listOf(
+                    RuleConfig(
+                        conditions = RuleConditions(filename = "(\\d{4})-(\\d{2})-(\\d{2})_Test_von_(.+)\\.pdf"),
+                        set = RuleSets(
+                            title = $$"Hallo $filename4 ($filename1-$filename2)",
+                            correspondent = "Bank",
+                            documentType = "Kontoauszug",
+                        )
                     )
-                )
-            ))
+                ),
+                "test"
+            )
             service.process(289L)
             assertThat(mockEngine.requestHistory.size).isEqualTo(2)
             assertThat(mockEngine.requestHistory.last().method).isEqualTo(HttpMethod.Patch)
@@ -217,16 +204,21 @@ class PaperlessInstanceTest {
 
             val connector = PaperlessConnector(mockEngine, url, "token")
             val contextFactory = TestPaperlessContextFactory()
-            val service = PaperlessInstanceService(connector, contextFactory, listOf(
-                RuleConfig(
-                    conditions = RuleConditions(filename = "(\\d{4})-(\\d{2})-(\\d{2})_Test_von_(.+)\\.pdf"),
-                    set = RuleSets(
-                        title = $$"Hallo $filename4 ($filename1-$filename2)",
-                        correspondent = "Bank",
-                        documentType = "Kontoauszug",
+            val service = PaperlessInstanceService(
+                connector,
+                contextFactory,
+                listOf(
+                    RuleConfig(
+                        conditions = RuleConditions(filename = "(\\d{4})-(\\d{2})-(\\d{2})_Test_von_(.+)\\.pdf"),
+                        set = RuleSets(
+                            title = $$"Hallo $filename4 ($filename1-$filename2)",
+                            correspondent = "Bank",
+                            documentType = "Kontoauszug",
+                        )
                     )
-                )
-            ))
+                ),
+                "test"
+            )
             service.process(289L)
             assertThat(mockEngine.requestHistory.size).isEqualTo(3)
             assertThat(mockEngine.requestHistory.last().method).isEqualTo(HttpMethod.Patch)

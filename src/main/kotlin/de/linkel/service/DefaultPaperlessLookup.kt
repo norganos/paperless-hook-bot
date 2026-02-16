@@ -36,6 +36,12 @@ class DefaultPaperlessLookup<T: BaseObj>(
             ?.takeIf { it.isTextual }
             ?.asText()
             ?.takeIf { it.isNotBlank() }
+            ?.let {
+                // paperless sends http protocol in rest response next/prev url although https is configured?
+                if (it.startsWith("http://") && connector.baseUrl.startsWith("https://")
+                    && it.substring(7).substringBefore('/') == connector.baseUrl.substring(8).substringBefore('/')
+                    ) "https://${it.substring(7)}" else it
+            }
             ?.also { load(it) }
     }
 

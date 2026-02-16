@@ -19,6 +19,7 @@ data class BasicAuthConfig(
 
 data class PaperlessConfig(
     val url: String,
+    val name: String = url,
     val token: String,
     val rules: List<RuleConfig> = emptyList()
 )
